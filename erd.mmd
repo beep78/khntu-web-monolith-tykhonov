@@ -1,0 +1,40 @@
+erDiagram
+    USER ||--o{ ENROLLMENT : enrolls
+    COURSE ||--o{ ENROLLMENT : has
+    CATEGORY ||--o{ COURSE : groups
+    USER ||--o{ COURSE : teaches
+    COURSE ||--o{ REVIEW : receives
+    USER ||--o{ REVIEW : writes
+
+    USER {
+        int id PK
+        string email
+        string fullName
+        string role
+    }
+    CATEGORY {
+        int id PK
+        string name
+    }
+    COURSE {
+        int id PK
+        int categoryId FK
+        int instructorId FK
+        string title
+        float price
+    }
+    ENROLLMENT {
+        int id PK
+        int userId FK
+        int courseId FK
+        datetime enrolledAt
+        int progressPercent
+        string status
+    }
+    REVIEW {
+        int id PK
+        int userId FK
+        int courseId FK
+        int rating
+        string comment
+    }
