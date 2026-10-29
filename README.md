@@ -1,47 +1,56 @@
-# Лабораторні роботи (Express + TypeScript)
+# Лабораторні роботи (Express + TypeScript + Prisma)
 
 Дисципліна «Технологія розробки Інтернет-застосунків», ХНТУ. Студент: Тихонов Вадим.
 
-ЛР1 — HTTP-сервер і ER-діаграма, ЛР2 — REST API на мок-даних.
+ЛР1 — HTTP-сервер, ЛР2 — REST API на мок-даних, ЛР3 — PostgreSQL і Prisma.
 
 ## Предметна область: платформа онлайн-курсів
 
-Викладачі створюють курси по категоріях, студенти записуються на курси, проходять їх і залишають відгуки.
+Викладачі ведуть курси, у курсів є модулі, а в модулів — уроки. Студенти записуються на курси.
 
-Сутності: `USER`, `CATEGORY`, `COURSE`, `ENROLLMENT`, `REVIEW`.
+Моделі: `User`, `Course`, `Module`, `Lesson`, `Enrollment`.
 
-- `CATEGORY` 1:N `COURSE`
-- `USER` (викладач) 1:N `COURSE`
-- `USER` N:M `COURSE` через `ENROLLMENT` (там ще `enrolledAt`, `progressPercent`, `status`)
-- `COURSE` 1:N `REVIEW`, `USER` 1:N `REVIEW`
+- `User` 1:N `Course` (викладач веде курси)
+- `Course` 1:N `Module`, `Module` 1:N `Lesson`
+- `User` N:M `Course` через `Enrollment` (там `enrolledAt` і `progressPercent`)
 
-## ER-діаграма
+Ролі користувача: `USER` (студент), `MANAGER` (викладач), `ADMIN` (адмін платформи).
 
 ```mermaid
 erDiagram
-    USER ||--o{ ENROLLMENT : enrolls
-    COURSE ||--o{ ENROLLMENT : has
-    CATEGORY ||--o{ COURSE : groups
-    USER ||--o{ COURSE : teaches
-    COURSE ||--o{ REVIEW : receives
-    USER ||--o{ REVIEW : writes
+    USER ||--o{ COURSE : "веде"
+    COURSE ||--o{ MODULE : "містить"
+    MODULE ||--o{ LESSON : "містить"
+    USER ||--o{ ENROLLMENT : "записується"
+    COURSE ||--o{ ENROLLMENT : "має"
 
     USER {
         int id PK
         string email
+        string password
         string fullName
         string role
-    }
-    CATEGORY {
-        int id PK
-        string name
+        datetime createdAt
     }
     COURSE {
         int id PK
-        int categoryId FK
-        int instructorId FK
         string title
+        string description
         float price
+        int instructorId FK
+    }
+    MODULE {
+        int id PK
+        string title
+        int position
+        int courseId FK
+    }
+    LESSON {
+        int id PK
+        string title
+        string content
+        int durationMinutes
+        int moduleId FK
     }
     ENROLLMENT {
         int id PK
@@ -49,50 +58,26 @@ erDiagram
         int courseId FK
         datetime enrolledAt
         int progressPercent
-        string status
-    }
-    REVIEW {
-        int id PK
-        int userId FK
-        int courseId FK
-        int rating
-        string comment
     }
 ```
 
 ## Запуск
 
-```bash
-npm install
-cp .env.example .env     # на Windows: copy .env.example .env
-npm run dev
-```
-
-Перевірка: `GET http://localhost:3000/api/v1/health`
-
-```json
-{
-  "status": "OK",
-  "uptime": 3.14,
-  "timestamp": "2026-10-27T01:00:00.000Z",
-  "nodeVersion": "v22.x.x",
-  "memoryUsage": { "rss": 0, "heapTotal": 0, "heapUsed": 0, "external": 0, "arrayBuffers": 0 }
-}
-```
-
-## Запуск
+Потрібні Node.js і PostgreSQL.
 
 ```bash
 npm install
 copy .env.example .env
+npx prisma migrate dev --name init
+npx prisma db seed
 npm run dev
 ```
 
-Сервер стартує на `http://localhost:3000`.
+Рядок підключення до БД лежить у `.env` (змінна `DATABASE_URL`).
 
 ## API (ЛР2)
 
-Дані лежать у масивах в пам'яті, база не використовується.
+Дані курсів і категорій поки що беруться з масивів у пам'яті.
 
 | Метод | Шлях | Що робить |
 |-------|------|-----------|
@@ -107,6 +92,10 @@ npm run dev
 ## Структура
 
 ```
+prisma/
+  schema.prisma
+  seed.ts
+  migrations/
 src/
   app.ts
   server.ts

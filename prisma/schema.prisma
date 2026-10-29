@@ -1,0 +1,65 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Користувач: студент (USER), викладач (MANAGER) або адмін (ADMIN)
+model User {
+  id          Int          @id @default(autoincrement())
+  email       String       @unique
+  password    String
+  fullName    String
+  role        String       @default("USER") // USER, MANAGER, ADMIN
+  createdAt   DateTime     @default(now())
+  courses     Course[]     // курси, які веде викладач (1:N)
+  enrollments Enrollment[]
+
+  @@index([email])
+}
+
+model Course {
+  id           Int          @id @default(autoincrement())
+  title        String
+  description  String?
+  price        Float
+  instructorId Int
+  instructor   User         @relation(fields: [instructorId], references: [id])
+  modules      Module[]
+  enrollments  Enrollment[]
+  createdAt    DateTime     @default(now())
+}
+
+model Module {
+  id       Int      @id @default(autoincrement())
+  title    String
+  position Int
+  courseId Int
+  course   Course   @relation(fields: [courseId], references: [id])
+  lessons  Lesson[]
+}
+
+model Lesson {
+  id              Int    @id @default(autoincrement())
+  title           String
+  content         String
+  durationMinutes Int
+  moduleId        Int
+  module          Module @relation(fields: [moduleId], references: [id])
+}
+
+// Проміжна таблиця для зв'язку N:M між User і Course
+model Enrollment {
+  id              Int      @id @default(autoincrement())
+  userId          Int
+  courseId        Int
+  enrolledAt      DateTime @default(now())
+  progressPercent Int      @default(0)
+  user            User     @relation(fields: [userId], references: [id])
+  course          Course   @relation(fields: [courseId], references: [id])
+
+  @@unique([userId, courseId])
+}
