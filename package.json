@@ -1,8 +1,8 @@
 {
-  "name": "khntu-web-monolith-tykhonov",
+  "name": "lab-api",
   "version": "0.1.0",
   "private": true,
-  "description": "ЛР1: початкова архітектура, ER-діаграма та HTTP-сервер (платформа онлайн-курсів)",
+  "description": "Лабораторні роботи: Express + TypeScript",
   "main": "dist/server.js",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",

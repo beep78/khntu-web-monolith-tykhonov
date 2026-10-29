@@ -1,6 +1,6 @@
 {
   "info": {
-    "name": "KhNTU Lab2 - Milestone 1",
+    "name": "Lab 2 - REST API",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [{ "key": "baseUrl", "value": "http://localhost:3000" }],

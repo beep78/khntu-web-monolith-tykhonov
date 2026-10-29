@@ -1,28 +1,19 @@
-# khntu-web-monolith-tykhonov
+# Лабораторні роботи (Express + TypeScript)
 
-Лабораторна робота №1 з дисципліни «Технологія розробки Інтернет-застосунків» (ХНТУ).
-Студент: Тихонов Вадим.
+Дисципліна «Технологія розробки Інтернет-застосунків», ХНТУ. Студент: Тихонов Вадим.
 
-Тема: початкова архітектура проєкту, ER-діаграма сутностей та налаштування HTTP-сервера.
+ЛР1 — HTTP-сервер і ER-діаграма, ЛР2 — REST API на мок-даних.
 
 ## Предметна область: платформа онлайн-курсів
 
-Система дозволяє викладачам публікувати курси, згруповані за категоріями, а студентам — записуватися на них,
-відстежувати прогрес навчання та залишати відгуки.
+Викладачі створюють курси по категоріях, студенти записуються на курси, проходять їх і залишають відгуки.
 
-| Сутність     | Призначення                                                                    |
-| ------------ | ------------------------------------------------------------------------------ |
-| `USER`       | Користувач системи (студент або викладач), поле `role` визначає роль          |
-| `CATEGORY`   | Категорія курсів (наприклад, «Програмування», «Дизайн»)                        |
-| `COURSE`     | Курс; належить одній категорії та одному викладачу                             |
-| `ENROLLMENT` | Проміжна сутність зв'язку N:M «користувач — курс» із власними атрибутами       |
-| `REVIEW`     | Відгук користувача про курс (оцінка та коментар)                               |
+Сутності: `USER`, `CATEGORY`, `COURSE`, `ENROLLMENT`, `REVIEW`.
 
-Зв'язки:
-
-- `CATEGORY` 1:N `COURSE`; `USER` (викладач) 1:N `COURSE`;
-- `USER` N:M `COURSE` через `ENROLLMENT` (атрибути: `enrolledAt`, `progressPercent`, `status`);
-- `COURSE` 1:N `REVIEW`; `USER` 1:N `REVIEW`.
+- `CATEGORY` 1:N `COURSE`
+- `USER` (викладач) 1:N `COURSE`
+- `USER` N:M `COURSE` через `ENROLLMENT` (там ще `enrolledAt`, `progressPercent`, `status`)
+- `COURSE` 1:N `REVIEW`, `USER` 1:N `REVIEW`
 
 ## ER-діаграма
 
@@ -89,35 +80,39 @@ npm run dev
 }
 ```
 
-## REST API (ЛР2, MILESTONE 1)
+## Запуск
 
-Дані зберігаються у пам'яті (мок-масиви у шарі `services`), БД не використовується.
+```bash
+npm install
+copy .env.example .env
+npm run dev
+```
 
-| Метод | Шлях | Опис |
-|-------|------|------|
+Сервер стартує на `http://localhost:3000`.
+
+## API (ЛР2)
+
+Дані лежать у масивах в пам'яті, база не використовується.
+
+| Метод | Шлях | Що робить |
+|-------|------|-----------|
 | GET | `/api/v1/health` | стан сервера |
-| GET | `/api/v1/courses` | список курсів |
-| GET | `/api/v1/courses/:id` | курс за id (404, якщо не знайдено) |
-| GET | `/api/v1/categories` | список категорій |
-| GET | `/api/v1/categories/:id` | категорія за id (404, якщо не знайдено) |
+| GET | `/api/v1/courses` | усі курси |
+| GET | `/api/v1/courses/:id` | курс за id (404, якщо нема) |
+| GET | `/api/v1/categories` | усі категорії |
+| GET | `/api/v1/categories/:id` | категорія за id (404, якщо нема) |
 
-Успішна відповідь: `{ "status": "success", "data": ... }`.
-Помилка: `{ "status": "error", "statusCode": 404, "message": "Курс не знайдено" }`.
-
-Postman-колекція: `postman_collection_milestone1.json`.
+Колекція для Postman: `postman_collection_milestone1.json`.
 
 ## Структура
 
 ```
 src/
-├── app.ts                       # Express: middleware, маршрути, errorHandler
-├── server.ts                    # запуск HTTP-слухача на порту з .env
-├── routes/                      # course.routes.ts, category.routes.ts
-├── controllers/                 # HTTP-шар: course.controller.ts, category.controller.ts
-├── services/                    # бізнес-логіка + мок-дані
-├── middlewares/                 # logger.middleware.ts, error.middleware.ts
-└── utils/                       # AppError.ts, catchAsync.ts
+  app.ts
+  server.ts
+  routes/
+  controllers/
+  services/
+  middlewares/
+  utils/
 ```
-
-Потік запиту: `routes -> controllers -> services`; помилки (`AppError`) потрапляють у глобальний `errorHandler`.
-У межах ЛР1–ЛР2 не використовуються ORM, база даних та бібліотеки валідації/автентифікації (за умовами «стоп-лінії»).

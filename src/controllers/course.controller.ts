@@ -1,16 +1,21 @@
-import { Request, Response } from 'express'
-import { CourseService } from '../services/course.service'
-import { catchAsync } from '../utils/catchAsync'
+import { Request, Response, NextFunction } from 'express';
+import { CourseService } from '../services/course.service';
 
-const courseService = new CourseService()
+const courseService = new CourseService();
 
 export class CourseController {
-  static getAll = catchAsync((req: Request, res: Response) => {
-    res.status(200).json({ status: 'success', data: courseService.getAll() })
-  })
+  static getAll(req: Request, res: Response) {
+    const items = courseService.getAll();
+    res.status(200).json({ status: 'success', data: items });
+  }
 
-  static getById = catchAsync((req: Request, res: Response) => {
-    const item = courseService.getById(Number(req.params.id))
-    res.status(200).json({ status: 'success', data: item })
-  })
+  static getById(req: Request, res: Response, next: NextFunction) {
+    try {
+      const id = Number(req.params.id);
+      const item = courseService.getById(id);
+      res.status(200).json({ status: 'success', data: item });
+    } catch (error) {
+      next(error);
+    }
+  }
 }

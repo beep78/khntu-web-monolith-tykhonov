@@ -1,8 +1,9 @@
-import { Router } from 'express'
-import { CategoryController } from '../controllers/category.controller'
+import { Router } from 'express';
+import { CategoryController } from '../controllers/category.controller';
 
-const router = Router()
-router.get('/', CategoryController.getAll)
-router.get('/:id', CategoryController.getById)
+const router = Router();
 
-export default router
+router.get('/', CategoryController.getAll);
+router.get('/:id', CategoryController.getById);
+
+export default router;
