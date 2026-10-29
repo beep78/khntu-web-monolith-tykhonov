@@ -1,0 +1,16 @@
+{
+  "info": {
+    "name": "KhNTU Lab2 - Milestone 1",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [{ "key": "baseUrl", "value": "http://localhost:3000" }],
+  "item": [
+    { "name": "Health", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/health" } },
+    { "name": "Courses - get all", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/courses" } },
+    { "name": "Courses - get by id (200)", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/courses/1" } },
+    { "name": "Courses - get by id (404)", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/courses/999" } },
+    { "name": "Categories - get all", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/categories" } },
+    { "name": "Categories - get by id (200)", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/categories/1" } },
+    { "name": "Categories - get by id (404)", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/categories/999" } }
+  ]
+}

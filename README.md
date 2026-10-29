@@ -89,12 +89,35 @@ npm run dev
 }
 ```
 
+## REST API (ЛР2, MILESTONE 1)
+
+Дані зберігаються у пам'яті (мок-масиви у шарі `services`), БД не використовується.
+
+| Метод | Шлях | Опис |
+|-------|------|------|
+| GET | `/api/v1/health` | стан сервера |
+| GET | `/api/v1/courses` | список курсів |
+| GET | `/api/v1/courses/:id` | курс за id (404, якщо не знайдено) |
+| GET | `/api/v1/categories` | список категорій |
+| GET | `/api/v1/categories/:id` | категорія за id (404, якщо не знайдено) |
+
+Успішна відповідь: `{ "status": "success", "data": ... }`.
+Помилка: `{ "status": "error", "statusCode": 404, "message": "Курс не знайдено" }`.
+
+Postman-колекція: `postman_collection_milestone1.json`.
+
 ## Структура
 
 ```
 src/
-├── app.ts      # створення та налаштування Express (middleware, маршрути)
-└── server.ts   # запуск HTTP-слухача на порту з .env
+├── app.ts                       # Express: middleware, маршрути, errorHandler
+├── server.ts                    # запуск HTTP-слухача на порту з .env
+├── routes/                      # course.routes.ts, category.routes.ts
+├── controllers/                 # HTTP-шар: course.controller.ts, category.controller.ts
+├── services/                    # бізнес-логіка + мок-дані
+├── middlewares/                 # logger.middleware.ts, error.middleware.ts
+└── utils/                       # AppError.ts, catchAsync.ts
 ```
 
-У межах ЛР1 не використовуються ORM, база даних та бібліотеки валідації/автентифікації (за умовами «стоп-лінії»).
+Потік запиту: `routes -> controllers -> services`; помилки (`AppError`) потрапляють у глобальний `errorHandler`.
+У межах ЛР1–ЛР2 не використовуються ORM, база даних та бібліотеки валідації/автентифікації (за умовами «стоп-лінії»).
