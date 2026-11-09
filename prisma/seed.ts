@@ -5,12 +5,10 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 Starting database seeding...');
 
-  // чистимо таблиці, щоб seed можна було запускати повторно
-  await prisma.enrollment.deleteMany();
-  await prisma.lesson.deleteMany();
-  await prisma.module.deleteMany();
-  await prisma.course.deleteMany();
-  await prisma.user.deleteMany();
+  // чистимо таблиці і скидаємо лічильники id, щоб seed можна було запускати повторно
+  await prisma.$executeRawUnsafe(
+    'TRUNCATE TABLE "OrderItem", "Order", "Enrollment", "Lesson", "Module", "Course", "User" RESTART IDENTITY CASCADE',
+  );
 
   const teacher = await prisma.user.create({
     data: { email: 'teacher@example.com', password: 'hash_teacher', fullName: 'Олена Коваль', role: 'MANAGER' },

@@ -4,6 +4,7 @@ import { loggerMiddleware } from './middlewares/logger.middleware';
 import { errorHandler } from './middlewares/error.middleware';
 import courseRoutes from './routes/course.routes';
 import categoryRoutes from './routes/category.routes';
+import orderRoutes from './routes/order.routes';
 
 const app = express();
 
@@ -23,6 +24,7 @@ app.get('/api/v1/health', (req, res) => {
 
 app.use('/api/v1/courses', courseRoutes);
 app.use('/api/v1/categories', categoryRoutes);
+app.use('/api/v1/orders', orderRoutes);
 
 // обробник помилок має бути останнім
 app.use(errorHandler);

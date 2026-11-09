@@ -1,21 +1,23 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response } from 'express';
 import { CourseService } from '../services/course.service';
+import { asyncHandler } from '../utils/asyncHandler';
 
 const courseService = new CourseService();
 
 export class CourseController {
-  static getAll(req: Request, res: Response) {
-    const items = courseService.getAll();
-    res.status(200).json({ status: 'success', data: items });
-  }
+  static getAll = asyncHandler(async (req: Request, res: Response) => {
+    const { page, limit } = req.query as unknown as { page: number; limit: number };
+    const data = await courseService.getPage(page, limit);
+    res.status(200).json({ status: 'success', data });
+  });
 
-  static getById(req: Request, res: Response, next: NextFunction) {
-    try {
-      const id = Number(req.params.id);
-      const item = courseService.getById(id);
-      res.status(200).json({ status: 'success', data: item });
-    } catch (error) {
-      next(error);
-    }
-  }
+  static getById = asyncHandler(async (req: Request, res: Response) => {
+    const item = await courseService.getById(Number(req.params.id));
+    res.status(200).json({ status: 'success', data: item });
+  });
+
+  static create = asyncHandler(async (req: Request, res: Response) => {
+    const item = await courseService.create(req.body);
+    res.status(201).json({ status: 'success', data: item });
+  });
 }

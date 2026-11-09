@@ -2,13 +2,13 @@
 
 Дисципліна «Технологія розробки Інтернет-застосунків», ХНТУ. Студент: Тихонов Вадим.
 
-ЛР1 — HTTP-сервер, ЛР2 — REST API на мок-даних, ЛР3 — PostgreSQL і Prisma.
+ЛР1 — HTTP-сервер, ЛР2 — REST API на мок-даних, ЛР3 — PostgreSQL і Prisma, ЛР4 — репозиторії, Zod, пагінація, транзакції, ЛР5 — bcrypt, JWT, RBAC, ЛР6 — клієнт і E2E-тести.
 
 ## Предметна область: платформа онлайн-курсів
 
 Викладачі ведуть курси, у курсів є модулі, а в модулів — уроки. Студенти записуються на курси.
 
-Моделі: `User`, `Course`, `Module`, `Lesson`, `Enrollment`.
+Моделі: `User`, `Course`, `Module`, `Lesson`, `Enrollment`, `Order`, `OrderItem`.
 
 - `User` 1:N `Course` (викладач веде курси)
 - `Course` 1:N `Module`, `Module` 1:N `Lesson`
@@ -63,45 +63,41 @@ erDiagram
 
 ## Запуск
 
-Потрібні Node.js і PostgreSQL.
+Потрібні Node.js 22 і PostgreSQL.
 
 ```bash
 npm install
 copy .env.example .env
-npx prisma migrate dev --name init
+npx prisma migrate dev
 npx prisma db seed
 npm run dev
 ```
 
-Рядок підключення до БД лежить у `.env` (змінна `DATABASE_URL`).
+Рядок підключення до БД лежить у `.env` (`DATABASE_URL`).
 
-## API (ЛР2)
+## Архітектура
 
-Дані курсів і категорій поки що беруться з масивів у пам'яті.
+`routes` -> `controllers` -> `services` -> `repositories` -> Prisma. Клієнт Prisma викликається лише в `repositories`, у контролерах і роутах його немає. Валідація тіла й query робиться через Zod-схеми з `src/dto` та middleware `validateBody` і `validateQuery`.
+
+## API
 
 | Метод | Шлях | Що робить |
 |-------|------|-----------|
 | GET | `/api/v1/health` | стан сервера |
-| GET | `/api/v1/courses` | усі курси |
-| GET | `/api/v1/courses/:id` | курс за id (404, якщо нема) |
-| GET | `/api/v1/categories` | усі категорії |
-| GET | `/api/v1/categories/:id` | категорія за id (404, якщо нема) |
-
-Колекція для Postman: `postman_collection_milestone1.json`.
+| GET | `/api/v1/courses?page=1&limit=10` | курси з пагінацією (`items`, `total`, `page`, `totalPages`, `hasNextPage`) |
+| GET | `/api/v1/courses/:id` | курс за id |
+| POST | `/api/v1/courses` | створити курс (валідація Zod) |
+| POST | `/api/v1/orders` | замовлення курсів в одній транзакції `$transaction`, ціна фіксується в `priceAtPurchase` |
+| GET | `/api/v1/orders/:id` | замовлення за id |
+| PATCH | `/api/v1/orders/:id/status` | зміна статусу за автоматом станів PENDING -> PAID -> CANCELLED |
 
 ## Структура
 
 ```
-prisma/
-  schema.prisma
-  seed.ts
-  migrations/
+prisma/        schema.prisma, seed.ts, migrations/
 src/
-  app.ts
-  server.ts
-  routes/
-  controllers/
-  services/
-  middlewares/
-  utils/
+  app.ts, server.ts
+  routes/ controllers/ services/ repositories/
+  dto/ middlewares/ lib/ utils/
+scripts/       перевірки API
 ```
