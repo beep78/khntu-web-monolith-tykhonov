@@ -6,8 +6,8 @@ import { CreateOrderDto } from '../dto/order.dto';
 const orderRepository = new OrderRepository();
 
 export class OrderService {
-  create(dto: CreateOrderDto) {
-    return orderRepository.createOrderTx(dto.userId, dto.items);
+  create(userId: number, dto: CreateOrderDto) {
+    return orderRepository.createOrderTx(userId, dto.items);
   }
 
   async getById(id: number) {

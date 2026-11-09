@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
@@ -10,17 +11,20 @@ async function main() {
     'TRUNCATE TABLE "OrderItem", "Order", "Enrollment", "Lesson", "Module", "Course", "User" RESTART IDENTITY CASCADE',
   );
 
+  // усі тестові облікові записи мають пароль Password123, у БД зберігається лише bcrypt-хеш
+  const hash = await bcrypt.hash('Password123', 10);
+
   const teacher = await prisma.user.create({
-    data: { email: 'teacher@example.com', password: 'hash_teacher', fullName: 'Олена Коваль', role: 'MANAGER' },
+    data: { email: 'teacher@example.com', password: hash, fullName: 'Олена Коваль', role: 'MANAGER' },
   });
   const admin = await prisma.user.create({
-    data: { email: 'admin@example.com', password: 'hash_admin', fullName: 'Адмін Платформи', role: 'ADMIN' },
+    data: { email: 'admin@khntu.edu.ua', password: hash, fullName: 'Адмін Платформи', role: 'ADMIN' },
   });
   const student1 = await prisma.user.create({
-    data: { email: 'ivan@example.com', password: 'hash_ivan', fullName: 'Іван Петренко' },
+    data: { email: 'ivan@example.com', password: hash, fullName: 'Іван Петренко' },
   });
   const student2 = await prisma.user.create({
-    data: { email: 'maria@example.com', password: 'hash_maria', fullName: 'Марія Шевченко' },
+    data: { email: 'maria@example.com', password: hash, fullName: 'Марія Шевченко' },
   });
 
   const course1 = await prisma.course.create({

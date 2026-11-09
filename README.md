@@ -73,7 +73,7 @@ npx prisma db seed
 npm run dev
 ```
 
-Рядок підключення до БД лежить у `.env` (`DATABASE_URL`).
+Рядок підключення до БД лежить у `.env` (`DATABASE_URL`), там же `JWT_SECRET`.
 
 ## Архітектура
 
@@ -86,10 +86,16 @@ npm run dev
 | GET | `/api/v1/health` | стан сервера |
 | GET | `/api/v1/courses?page=1&limit=10` | курси з пагінацією (`items`, `total`, `page`, `totalPages`, `hasNextPage`) |
 | GET | `/api/v1/courses/:id` | курс за id |
-| POST | `/api/v1/courses` | створити курс (валідація Zod) |
-| POST | `/api/v1/orders` | замовлення курсів в одній транзакції `$transaction`, ціна фіксується в `priceAtPurchase` |
-| GET | `/api/v1/orders/:id` | замовлення за id |
-| PATCH | `/api/v1/orders/:id/status` | зміна статусу за автоматом станів PENDING -> PAID -> CANCELLED |
+| POST | `/api/v1/auth/register` | реєстрація, пароль хешується bcrypt (10 раундів), роль USER |
+| POST | `/api/v1/auth/login` | вхід, повертає Access JWT на 15 хвилин |
+| GET | `/api/v1/auth/me` | дані з токена (authGuard) |
+| POST | `/api/v1/courses` | створити курс, тільки ADMIN |
+| DELETE | `/api/v1/courses/:id` | видалити курс, тільки ADMIN |
+| POST | `/api/v1/orders` | замовлення від імені користувача з токена, одна транзакція |
+| GET | `/api/v1/orders/:id` | замовлення, USER бачить лише свої |
+| PATCH | `/api/v1/orders/:id/status` | зміна статусу, MANAGER або ADMIN |
+
+Ролі: `USER`, `MANAGER`, `ADMIN`. Тестові акаунти з seed мають пароль `Password123`: `admin@khntu.edu.ua` (ADMIN), `teacher@example.com` (MANAGER), `ivan@example.com` (USER).
 
 ## Структура
 

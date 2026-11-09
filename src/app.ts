@@ -5,6 +5,7 @@ import { errorHandler } from './middlewares/error.middleware';
 import courseRoutes from './routes/course.routes';
 import categoryRoutes from './routes/category.routes';
 import orderRoutes from './routes/order.routes';
+import authRoutes from './routes/auth.routes';
 
 const app = express();
 
@@ -22,6 +23,7 @@ app.get('/api/v1/health', (req, res) => {
   });
 });
 
+app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/courses', courseRoutes);
 app.use('/api/v1/categories', categoryRoutes);
 app.use('/api/v1/orders', orderRoutes);

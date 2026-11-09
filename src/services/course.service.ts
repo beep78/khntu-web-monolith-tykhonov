@@ -18,10 +18,21 @@ export class CourseService {
     return course;
   }
 
-  async create(dto: CreateCourseDto) {
-    const instructor = await userRepository.findById(dto.instructorId);
+  async create(dto: CreateCourseDto, currentUserId: number) {
+    const instructorId = dto.instructorId ?? currentUserId;
+    const instructor = await userRepository.findById(instructorId);
     if (!instructor) throw new AppError('Викладача з таким id не знайдено', 404);
     if (instructor.role === 'USER') throw new AppError('Курс може вести лише MANAGER або ADMIN', 400);
-    return courseRepository.create(dto);
+    return courseRepository.create({
+      title: dto.title,
+      description: dto.description,
+      price: dto.price,
+      instructorId,
+    });
+  }
+
+  async remove(id: number) {
+    await this.getById(id);
+    await courseRepository.deleteById(id);
   }
 }

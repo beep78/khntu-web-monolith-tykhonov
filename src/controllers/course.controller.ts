@@ -17,7 +17,12 @@ export class CourseController {
   });
 
   static create = asyncHandler(async (req: Request, res: Response) => {
-    const item = await courseService.create(req.body);
+    const item = await courseService.create(req.body, req.user!.id);
     res.status(201).json({ status: 'success', data: item });
+  });
+
+  static remove = asyncHandler(async (req: Request, res: Response) => {
+    await courseService.remove(Number(req.params.id));
+    res.status(200).json({ status: 'success', message: 'Курс видалено' });
   });
 }

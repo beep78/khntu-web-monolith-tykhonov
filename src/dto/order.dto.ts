@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
+// userId береться з JWT, а не з тіла запиту
 export const CreateOrderSchema = z.object({
-  userId: z.number().int().positive(),
   items: z
     .array(
       z.object({
