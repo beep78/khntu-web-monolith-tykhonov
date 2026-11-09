@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Платформа онлайн-курсів — клієнтський UI</title>
+<style>
+  body { font-family: Arial, sans-serif; margin: 30px auto; max-width: 820px; background: #f4f6f8; color: #1f2937; }
+  .card { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+  input, button { padding: 8px; margin: 5px 4px 5px 0; }
+  button { background: #0284c7; color: white; border: none; cursor: pointer; border-radius: 4px; }
+  button.secondary { background: #6b7280; }
+  ul { padding-left: 18px; }
+  li { margin: 6px 0; }
+  .ok { color: #15803d; } .err { color: #b91c1c; }
+</style>
+</head>
+<body>
+<h1>Платформа онлайн-курсів</h1>
+
+<div class="card">
+  <h2>1. Автентифікація</h2>
+  <input type="email" id="email" placeholder="Email" value="admin@khntu.edu.ua">
+  <input type="password" id="password" placeholder="Пароль" value="Password123">
+  <button onclick="login()">Увійти</button>
+  <button class="secondary" onclick="logout()">Очистити токен</button>
+  <p id="authStatus">Сесія не розпочата.</p>
+</div>
+
+<div class="card">
+  <h2>2. Список курсів (Fetch API)</h2>
+  <button onclick="loadCourses(page - 1)" id="prev">Назад</button>
+  <button onclick="loadCourses(page + 1)" id="next">Далі</button>
+  <button onclick="loadCourses(page)">Оновити список</button>
+  <span id="pageInfo"></span>
+  <ul id="courseList"></ul>
+</div>
+
+<div class="card">
+  <h2>3. Новий курс (тільки ADMIN)</h2>
+  <input id="newTitle" placeholder="Назва курсу">
+  <input id="newPrice" type="number" placeholder="Ціна">
+  <button onclick="createCourse()">Створити</button>
+  <p id="createStatus"></p>
+</div>
+
+<script>
+let token = '';
+let page = 1;
+const LIMIT = 5;
+
+function setStatus(id, text, ok) {
+  const el = document.getElementById(id);
+  el.textContent = text;
+  el.className = ok ? 'ok' : 'err';
+}
+
+async function login() {
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
+  const res = await fetch('/api/v1/auth/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password })
+  });
+  const data = await res.json();
+  if (res.ok) {
+    token = data.token;
+    setStatus('authStatus', 'Успішний вхід! Токен отримано. Роль: ' + data.data.user.role, true);
+  } else {
+    setStatus('authStatus', 'Помилка: ' + data.message, false);
+  }
+}
+
+function logout() {
+  token = '';
+  setStatus('authStatus', 'Сесія завершена', true);
+}
+
+async function loadCourses(p) {
+  page = Math.max(1, p || 1);
+  const res = await fetch('/api/v1/courses?page=' + page + '&limit=' + LIMIT, {
+    headers: token ? { 'Authorization': 'Bearer ' + token } : {}
+  });
+  const data = await res.json();
+  const list = document.getElementById('courseList');
+  list.innerHTML = '';
+  if (data.data && data.data.items) {
+    data.data.items.forEach(item => {
+      const li = document.createElement('li');
+      li.textContent = item.title + ' — ' + item.price + ' грн';
+      list.appendChild(li);
+    });
+    document.getElementById('pageInfo').textContent =
+      'Сторінка ' + data.data.page + ' з ' + data.data.totalPages + ', усього курсів: ' + data.data.total;
+    document.getElementById('prev').disabled = page <= 1;
+    document.getElementById('next').disabled = !data.data.hasNextPage;
+  } else {
+    list.textContent = data.message || 'Не вдалося завантажити список';
+  }
+}
+
+async function createCourse() {
+  const title = document.getElementById('newTitle').value;
+  const price = Number(document.getElementById('newPrice').value);
+  const res = await fetch('/api/v1/courses', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...(token ? { 'Authorization': 'Bearer ' + token } : {}) },
+    body: JSON.stringify({ title, price })
+  });
+  const data = await res.json();
+  if (res.ok) {
+    setStatus('createStatus', 'Курс створено: ' + data.data.title, true);
+    loadCourses(1);
+  } else {
+    const details = data.errors ? ' ' + data.errors.map(e => e.field + ': ' + e.message).join('; ') : '';
+    setStatus('createStatus', 'Помилка ' + res.status + ': ' + data.message + details, false);
+  }
+}
+
+loadCourses(1);
+</script>
+</body>
+</html>

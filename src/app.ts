@@ -1,4 +1,5 @@
 import express from 'express';
+import path from 'path';
 import cors from 'cors';
 import { loggerMiddleware } from './middlewares/logger.middleware';
 import { errorHandler } from './middlewares/error.middleware';
@@ -12,6 +13,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(loggerMiddleware);
+
+// роздача статичного клієнта з папки public
+app.use(express.static(path.join(__dirname, '../public')));
 
 app.get('/api/v1/health', (req, res) => {
   res.status(200).json({

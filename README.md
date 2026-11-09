@@ -97,6 +97,12 @@ npm run dev
 
 Ролі: `USER`, `MANAGER`, `ADMIN`. Тестові акаунти з seed мають пароль `Password123`: `admin@khntu.edu.ua` (ADMIN), `teacher@example.com` (MANAGER), `ivan@example.com` (USER).
 
+## Клієнт і тести
+
+Сторінка `public/index.html` роздається через `express.static` і відкривається на `http://localhost:3000`. Вона вміє входити, показувати курси з пагінацією, створювати курс (ADMIN) і завершувати сесію.
+
+E2E-колекція Postman: `postman_collection_e2e.json`. З командного рядка: `npm run e2e`.
+
 ## Структура
 
 ```
@@ -106,4 +112,5 @@ src/
   routes/ controllers/ services/ repositories/
   dto/ middlewares/ lib/ utils/
 scripts/       перевірки API
+public/        клієнтська сторінка
 ```
